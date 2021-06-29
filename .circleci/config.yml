@@ -7,6 +7,9 @@ executors:
   mac:
     macos:
       xcode: 12.5.0
+  flutter:
+    docker:
+      - image: cirrusci/flutter:2.2.2
 
 jobs:
   beta_android:
@@ -45,8 +48,27 @@ jobs:
           command: bundle exec fastlane beta
           working_directory: ios
 
+  unit_test:
+    executor: flutter
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "pubspec.lock" }}
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+      - save_cache:
+          paths:
+            - .dart_tool
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}
+      - run:
+          name: Run tests
+          command: flutter test
+
 workflows:
   beta:
     jobs:
       - beta_android
       - beta_ios
+      - unit_test
