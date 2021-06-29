@@ -17,17 +17,16 @@ jobs:
     executor: android
     steps:
       - checkout
-      - ruby/install:
-          version: '3.0.1'
-      - ruby/install-deps
+      - run: ruby --version
 
   beta_ios:
     executor: mac
     steps:
       - checkout
-      - ruby/install:
-          version: '3.0.1'
-      - ruby/install-deps
+      - run:
+          name: Set Ruby Version
+          command: echo 'chruby system' >> ~/.bash_profile
+      - run: ruby --version
 
 workflows:
   beta:
