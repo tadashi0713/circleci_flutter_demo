@@ -17,16 +17,20 @@ jobs:
     executor: android
     steps:
       - checkout
-      - run: ruby --version
 
   beta_ios:
     executor: mac
     steps:
       - checkout
-      - run:
-          name: Set Ruby Version
-          command: echo 'chruby system' >> ~/.bash_profile
-      - run: ruby --version
+      - restore_cache:
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
+      - run: 
+          command: bundle install
+          working_directory: ios
+      - save_cache:
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
+          paths:
+            - vendor/bundle
 
 workflows:
   beta:
