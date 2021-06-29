@@ -2,9 +2,9 @@ version: 2.1
 
 executors:
   android:
-    docker:
-      - image: cimg/android:30.0
-    resource_class: xlarge
+    machine:
+      image: android:202102-01
+    resource-class: xlarge
   mac:
     macos:
       xcode: 12.5.0
@@ -17,6 +17,18 @@ jobs:
     executor: android
     steps:
       - checkout
+      - restore_cache:
+          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
+      - run: 
+          command: bundle install
+          working_directory: android
+      - save_cache:
+          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
+          paths:
+            - vendor/bundle
+      - run:
+          command: bundle exec fastlane beta
+          working_directory: android
 
   beta_ios:
     executor: mac
@@ -31,6 +43,9 @@ jobs:
           key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
           paths:
             - vendor/bundle
+      - run:
+          command: bundle exec fastlane beta
+          working_directory: ios
 
 workflows:
   beta:
