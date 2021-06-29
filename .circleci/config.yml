@@ -5,16 +5,32 @@ executors:
     docker:
       - image: cimg/android:30.0
     resource_class: xlarge
+  mac:
+    macos:
+      xcode: 12.5.0
 
 orbs:
   ruby: circleci/ruby@1.1.4
 
 jobs:
-  build:
+  beta_android:
     executor: android
     steps:
       - checkout
       - ruby/install:
           version: '3.0.1'
-      - run: cd android
       - ruby/install-deps
+
+  beta_ios:
+    executor: mac
+    steps:
+      - checkout
+      - ruby/install:
+          version: '3.0.1'
+      - ruby/install-deps
+
+workflows:
+  beta:
+    jobs:
+      - beta_android
+      - beta_ios
