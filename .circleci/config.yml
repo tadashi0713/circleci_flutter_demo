@@ -16,12 +16,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
+          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}
       - run: 
-          command: bundle install
+          command: bundle install --path vendor/bundle
           working_directory: android
       - save_cache:
-          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
+          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}
           paths:
             - android/vendor/bundle
       - run:
@@ -33,12 +33,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}
       - run: 
-          command: bundle install
+          command: bundle install --path vendor/bundle
           working_directory: ios
       - save_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}
           paths:
             - ios/vendor/bundle
       - run:
