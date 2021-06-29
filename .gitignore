@@ -45,6 +45,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# ruby
+**/vendor/bundle
+
 # fastlane
 **/fastlane/README.md
 **/fastlane/report.xml
