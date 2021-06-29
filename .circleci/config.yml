@@ -18,7 +18,7 @@ jobs:
       - restore_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}
       - run: 
-          command: bundle install --path vendor/bundle
+          command: bundle install
           working_directory: android
       - save_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}
@@ -35,7 +35,7 @@ jobs:
       - restore_cache:
           key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}
       - run: 
-          command: bundle install --path vendor/bundle
+          command: bundle install
           working_directory: ios
       - save_cache:
           key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}
