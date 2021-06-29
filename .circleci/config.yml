@@ -1,20 +1,18 @@
 version: 2.1
 
+orbs:
+  android: circleci/android@1.0.3
+
 executors:
-  android:
-    machine:
-      image: android:202102-01
-    resource-class: xlarge
   mac:
     macos:
       xcode: 12.5.0
 
-orbs:
-  ruby: circleci/ruby@1.1.4
-
 jobs:
   beta_android:
-    executor: android
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
     steps:
       - checkout
       - restore_cache:
