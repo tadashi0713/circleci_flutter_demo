@@ -4,6 +4,7 @@ executors:
   android:
     docker:
       - image: cimg/android:30.0
+    resource_class: xlarge
 
 orbs:
   ruby: circleci/ruby@1.1.4
@@ -15,4 +16,6 @@ jobs:
       - checkout
       - ruby/install:
           version: '3.0.1'
-      - run: echo "Ruby 3.0.1 has been installed"
+      - run: cd android
+      - ruby/install-deps
+          with-cache: true
