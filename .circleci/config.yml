@@ -92,13 +92,20 @@ jobs:
     executor: mac
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
-          name: Install flutter
+          name: Install flutter & dependencies
           command: |
-            if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
+            curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip
             unzip flutter_sdk.zip
-            echo "export PATH=$PATH:`pwd`/flutter/bin" >> $BASH_ENV
-            flutter doctor
+            export PATH="$PATH:`pwd`/flutter/bin"
+            flutter pub get
+      - save_cache:
+          paths:
+            - .dart_tool
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - restore_cache:
           key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
       - run: 
@@ -124,8 +131,6 @@ jobs:
 
   integration_test_ios:
     executor: mac
-    environment:
-      HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
       - attach_workspace:
           at: .
@@ -134,7 +139,9 @@ jobs:
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
-          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: |
+            export PATH="$PATH:`pwd`/flutter/bin"
+            flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
 workflows:
   test_and_distribute:
