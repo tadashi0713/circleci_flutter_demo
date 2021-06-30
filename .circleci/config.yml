@@ -17,16 +17,6 @@ jobs:
     executor: flutter
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - run:
-          name: Install Dependencies
-          command: flutter pub get
-      - save_cache:
-          paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
           name: Run tests
           command: flutter test
@@ -41,16 +31,6 @@ jobs:
           name: Install flutter
           command: |
             sudo snap install flutter --classic
-      - restore_cache:
-          keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - run:
-          name: Install Dependencies
-          command: flutter pub get
-      - save_cache:
-          paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - restore_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
       - run: 
@@ -116,16 +96,6 @@ jobs:
           name: Install flutter
           command: |
             brew install flutter
-      - restore_cache:
-          keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - run:
-          name: Install Dependencies
-          command: flutter pub get
-      - save_cache:
-          paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - restore_cache:
           key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
       - run: 
