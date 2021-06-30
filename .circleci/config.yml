@@ -74,7 +74,7 @@ jobs:
       - run:
           name: Install flutter
           command: |
-            brew install flutter
+            HOMEBREW_NO_AUTO_UPDATE=1 brew install flutter
             flutter doctor
       - restore_cache:
           keys:
