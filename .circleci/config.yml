@@ -99,6 +99,7 @@ jobs:
             unzip flutter_sdk.zip
             pwd
             echo 'export PATH="$PATH:`pwd`/flutter/bin"'  >> $BASH_ENV
+            export PATH="$PATH:`pwd`/flutter/bin"
             flutter doctor
       - restore_cache:
           key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
