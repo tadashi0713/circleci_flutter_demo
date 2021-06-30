@@ -46,7 +46,7 @@ jobs:
       #       - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
           name: Install Dependencies
-          command: flutter pub get
+          command: pwd
           working_directory: project
       - save_cache:
           paths:
