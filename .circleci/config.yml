@@ -10,6 +10,7 @@ executors:
   flutter:
     docker:
       - image: cirrusci/flutter:2.2.2
+    resource_class: xlarge
 
 jobs:
   beta_android:
@@ -54,17 +55,36 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}
+            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
           name: Install Dependencies
           command: flutter pub get
       - save_cache:
           paths:
             - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
           name: Run tests
           command: flutter test
+
+  integration_test_ios:
+    executor: mac
+    steps:
+      - checkout
+      - run:
+          name: Install flutter
+          command: | 
+            brew cask install flutter
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+      - save_cache:
+          paths:
+            - .dart_tool
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
 
 workflows:
   beta:
@@ -72,3 +92,4 @@ workflows:
       - beta_android
       - beta_ios
       - unit_test
+      - integration_test_ios
