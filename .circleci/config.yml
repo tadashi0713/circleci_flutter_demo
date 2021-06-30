@@ -41,16 +41,17 @@ jobs:
           name: Install flutter
           command: |
             sudo snap install flutter --classic
-      # - restore_cache:
-      #     keys:
-      #       - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "project/pubspec.lock" }}-{{ arch }}
       - run:
           name: Install Dependencies
           command: flutter pub get
+          working_directory: project
       - save_cache:
           paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+            - project/.dart_tool
+          key: dart-dependencies-{{ checksum "project/pubspec.lock" }}-{{ arch }}
       - restore_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
       - run: 
