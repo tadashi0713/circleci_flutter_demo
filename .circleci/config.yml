@@ -74,9 +74,7 @@ jobs:
       - run:
           name: Install flutter
           command: |
-            if ! test -f "~/flutter_sdk.zip"; then curl -o ~/flutter_sdk.zip https://storage.googleapis.com/flutter_infra/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
-            unzip ~/flutter_sdk.zip -d ~
-            echo 'export PATH="$PATH:~/flutter/bin"'  >> $BASH_ENV
+            brew install flutter
             flutter doctor
       - restore_cache:
           keys:
