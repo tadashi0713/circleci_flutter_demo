@@ -115,7 +115,16 @@ jobs:
           name: Install flutter
           command: |
             sudo snap install flutter --classic
-            flutter doctor
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+      - save_cache:
+          paths:
+            - .dart_tool
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
           name: Wait for emulator
           command: |
@@ -126,6 +135,9 @@ jobs:
             adb shell settings put global window_animation_scale 0.0
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
+      - run:
+          name: Integration Test
+          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
 workflows:
   beta:
