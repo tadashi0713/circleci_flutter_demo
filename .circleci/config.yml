@@ -13,42 +13,6 @@ executors:
     resource_class: xlarge
 
 jobs:
-  beta_android:
-    executor:
-      name: android/android-machine
-      resource-class: xlarge
-    steps:
-      - checkout
-      - restore_cache:
-          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
-      - run: 
-          command: bundle install
-          working_directory: android
-      - save_cache:
-          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
-          paths:
-            - android/vendor/bundle
-      - run:
-          command: bundle exec fastlane beta
-          working_directory: android
-
-  beta_ios:
-    executor: mac
-    steps:
-      - checkout
-      - restore_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
-      - run: 
-          command: bundle install
-          working_directory: ios
-      - save_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
-          paths:
-            - ios/vendor/bundle
-      - run:
-          command: bundle exec fastlane beta
-          working_directory: ios
-
   unit_test:
     executor: flutter
     steps:
@@ -67,14 +31,86 @@ jobs:
           name: Run tests
           command: flutter test
 
-  integration_test_ios:
-    executor: mac
-    environment:
-      HOMEBREW_NO_AUTO_UPDATE: 1
+  setup_android:
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
     steps:
+      - checkout
       - run:
-          name: pre-start simulator
-          command: xcrun instruments -w "iPhone 12 (14.5) [" || true
+          name: Install flutter
+          command: |
+            sudo snap install flutter --classic
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - run:
+          name: Install Dependencies
+          command: flutter pub get
+      - save_cache:
+          paths:
+            - .dart_tool
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - restore_cache:
+          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
+      - run: 
+          command: bundle install
+          working_directory: android
+      - save_cache:
+          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
+          paths:
+            - android/vendor/bundle
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  integration_test_android:
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create AVD
+          command: |
+            SYSTEM_IMAGES="system-images;android-29;default;x86"
+            sdkmanager "$SYSTEM_IMAGES"
+            echo "no" | avdmanager --verbose create avd -n test -k "$SYSTEM_IMAGES"
+      - run:
+          name: Boot emulator
+          command: |
+            emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          background: true
+      - run:
+          name: Wait for emulator
+          command: |
+            circle-android wait-for-boot
+      - run:
+          name: Disable emulator animation
+          command: |
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
+      - run:
+          name: Integration Test
+          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+
+  distribute_android:
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          command: bundle exec fastlane beta
+          working_directory: android
+
+  setup_ios:
+    executor: mac
+    steps:
       - checkout
       - run:
           name: Install flutter
@@ -90,60 +126,58 @@ jobs:
           paths:
             - .dart_tool
           key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - run:
-          name: Integration Test
-          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
-
-  integration_test_android:
-    executor:
-      name: android/android-machine
-      resource-class: xlarge
-    steps:
-      - checkout
-      - run:
-          name: Create AVD
-          command: |
-            SYSTEM_IMAGES="system-images;android-29;default;x86"
-            sdkmanager "$SYSTEM_IMAGES"
-            echo "no" | avdmanager --verbose create avd -n test -k "$SYSTEM_IMAGES"
-      - run:
-          name: Boot emulator
-          command: |
-            emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          background: true
-      - run:
-          name: Install flutter
-          command: |
-            sudo snap install flutter --classic
       - restore_cache:
-          keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - run:
-          name: Install Dependencies
-          command: flutter pub get
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
+      - run: 
+          command: bundle install
+          working_directory: ios
       - save_cache:
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
           paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+            - ios/vendor/bundle
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  distribute_ios:
+    executor: mac
+    steps:
+      - attach_workspace:
+          at: .
       - run:
-          name: Wait for emulator
-          command: |
-            circle-android wait-for-boot
+          command: bundle exec fastlane beta
+          working_directory: ios
+
+  integration_test_ios:
+    executor: mac
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - attach_workspace:
+          at: .
       - run:
-          name: Disable emulator animation
-          command: |
-            adb shell settings put global window_animation_scale 0.0
-            adb shell settings put global transition_animation_scale 0.0
-            adb shell settings put global animator_duration_scale 0.0
+          name: pre-start simulator
+          command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
           command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
 workflows:
-  beta:
+  test_and_distribute:
     jobs:
-      - beta_android
-      - beta_ios
       - unit_test
-      - integration_test_ios
-      - integration_test_android
+      - setup_ios
+      - integration_test_ios:
+          requires:
+            - setup_ios
+      - distribute_ios:
+          requires:
+            - setup_ios
+      - setup_android
+      - integration_test_android:
+          requires:
+            - setup_android
+      - distribute_android:
+          requires:
+            - setup_android
