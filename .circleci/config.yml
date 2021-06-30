@@ -98,9 +98,9 @@ jobs:
       - run:
           name: Install flutter & dependencies
           command: |
-            curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip
+            if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
             unzip flutter_sdk.zip
-            export PATH="$PATH:`pwd`/flutter/bin"
+            echo "export PATH='$PATH:`pwd`/flutter/bin'" >> $BASH_ENV
             flutter pub get
       - save_cache:
           paths:
