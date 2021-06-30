@@ -69,13 +69,17 @@ jobs:
 
   integration_test_ios:
     executor: mac
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
+      - run:
+          name: pre-start simulator
+          command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - checkout
       - run:
           name: Install flutter
           command: |
-            HOMEBREW_NO_AUTO_UPDATE=1 brew install flutter
-            flutter doctor
+            brew install flutter
       - restore_cache:
           keys:
             - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
@@ -86,6 +90,9 @@ jobs:
           paths:
             - .dart_tool
           key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - run:
+          name: Integration Test
+          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
 workflows:
   beta:
