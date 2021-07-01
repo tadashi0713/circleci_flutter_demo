@@ -16,8 +16,17 @@
 default_platform(:android)
 
 platform :android do
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    puts "beta"
+  desc "Distribute new debug application to firebase app distribution"
+  lane :distribute_debug do
+    if is_ci?
+    else
+      sh("cd ../../ && flutter build apk --debug")
+    end
+    firebase_app_distribution(
+      app: "1:923170042883:android:ac46089ace0c303be70a36",
+      testers: "tadashi.nemoto0713@gmail.com",
+      apk_path: "../build/app/outputs/apk/debug/app-debug.apk",
+      firebase_cli_token: ENV["FIREBASE_TOKEN"]
+    )
   end
 end
