@@ -18,13 +18,13 @@ commands:
       - run: |
           if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
           unzip flutter_sdk.zip
-          echo "export PATH='$PATH:`pwd`/flutter/bin'" >> $BASH_ENV
+          ./flutter/bin/flutter pub get
   install_flutter_linux:
     steps:
       - run: |
           if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
           tar xf flutter_sdk.tar.xz
-          echo "export PATH='$PATH:`pwd`/flutter/bin'" >> $BASH_ENV
+          ./flutter/bin/flutter pub get
   install_android_gems:
     steps:
       - restore_cache:
