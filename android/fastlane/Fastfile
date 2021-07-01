@@ -19,6 +19,7 @@ platform :android do
   desc "Distribute new debug application to firebase app distribution"
   lane :distribute_debug do
     if is_ci?
+      sh("cd ../../ && $FLUTTER_HOME/bin/flutter build apk --debug")
     else
       sh("cd ../../ && flutter build apk --debug")
     end
