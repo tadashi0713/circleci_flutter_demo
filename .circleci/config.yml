@@ -101,7 +101,6 @@ jobs:
             if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
             unzip flutter_sdk.zip
             echo "export PATH='$PATH:`pwd`/flutter/bin'" >> $BASH_ENV
-            export PATH="$PATH:`pwd`/flutter/bin"
             flutter pub get
       - save_cache:
           paths:
@@ -140,9 +139,7 @@ jobs:
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
-          command: |
-            export PATH="$PATH:`pwd`/flutter/bin"
-            flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
 workflows:
   test_and_distribute:
