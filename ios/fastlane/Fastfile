@@ -16,8 +16,12 @@
 default_platform(:ios)
 
 platform :ios do
-  desc "Description of what the lane does"
-  lane :beta do
-    puts "beta"
+  desc "Distribute new debug application to firebase app distribution"
+  lane :distribute_debug do
+    if is_ci?
+      sh("cd ../../ && $FLUTTER_HOME/bin/flutter build ios --no-codesign")
+    else
+      sh("cd ../../ && flutter build ios --no-codesign")
+    end
   end
 end
