@@ -27,16 +27,7 @@ commands:
           echo "export PATH='$PATH:`pwd`/flutter/bin'" >> $BASH_ENV
   install_flutter_dependencies:
     steps:
-      - restore_cache:
-          keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - run: |
-          flutter pub get
-          flutter packages pub run build_runner build
-      - save_cache:
-          paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - run: flutter pub get
   install_android_gems:
     steps:
       - restore_cache:
@@ -87,6 +78,7 @@ jobs:
     executor: flutter
     steps:
       - checkout
+      - install_flutter_dependencies
       - run:
           name: Run tests
           command: flutter test
