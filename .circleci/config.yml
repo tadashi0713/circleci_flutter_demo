@@ -113,9 +113,12 @@ jobs:
           command: ./flutter/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
   distribute_android:
-    executor: flutter
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
     steps:
       - checkout
+      - install_flutter_linux
       - install_android_gradle
       - install_android_gems
       - run:
