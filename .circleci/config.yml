@@ -60,17 +60,17 @@ commands:
           paths:
             - ~/.gradle
           key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
-  install_ios_pod:
-    steps:
-      - restore_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
-      - run: 
-          command: pod install
-          working_directory: ios
-      - save_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
-          paths:
-            - ios/Pods
+  # install_ios_pod:
+  #   steps:
+  #     - restore_cache:
+  #         key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
+  #     - run: 
+  #         command: pod install
+  #         working_directory: ios
+  #     - save_cache:
+  #         key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
+  #         paths:
+  #           - ios/Pods
 
 jobs:
   unit_test:
@@ -132,7 +132,7 @@ jobs:
     steps:
       - checkout
       - install_flutter_macos
-      - install_ios_pod
+      # - install_ios_pod
       - run:
           name: pre-start simulator
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
@@ -145,7 +145,7 @@ jobs:
     steps:
       - checkout
       - install_flutter_macos
-      - install_ios_pod
+      # - install_ios_pod
       - install_ios_gems
       - run:
           command: bundle exec fastlane distribute_debug
