@@ -27,19 +27,12 @@ jobs:
       resource-class: xlarge
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
           name: Install flutter & dependencies
           command: |
             if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
             tar xf flutter_sdk.tar.xz
             ./flutter/bin/flutter pub get .
-      - save_cache:
-          paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - restore_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
       - run: 
@@ -49,6 +42,15 @@ jobs:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
           paths:
             - android/vendor/bundle
+      - restore_cache:
+          key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
+      - run:
+          command: ./gradlew androidDependencies
+          working_directory: android
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
       - persist_to_workspace:
           root: .
           paths:
