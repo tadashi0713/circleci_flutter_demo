@@ -45,9 +45,7 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
       - run:
-          command: | 
-            sudo chmod +x ./gradlew
-            ./gradlew androidDependencies
+          command: gradle androidDependencies
           working_directory: android
       - save_cache:
           paths:
