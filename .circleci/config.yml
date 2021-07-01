@@ -12,27 +12,33 @@ executors:
       - image: cirrusci/flutter:2.2.2
     resource_class: xlarge
 
-jobs:
-  unit_test:
-    executor: flutter
+commands:
+  install_flutter_macos:
     steps:
-      - checkout
-      - run:
-          name: Run tests
-          command: flutter test
-
-  setup_android:
-    executor:
-      name: android/android-machine
-      resource-class: xlarge
+      - run: |
+          if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
+          unzip flutter_sdk.zip
+          echo "export PATH='$PATH:`pwd`/flutter/bin'" >> $BASH_ENV
+  install_flutter_linux:
     steps:
-      - checkout
-      - run:
-          name: Install flutter & dependencies
-          command: |
-            if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
-            tar xf flutter_sdk.tar.xz
-            ./flutter/bin/flutter pub get .
+      - run: |
+          if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
+          tar xf flutter_sdk.tar.xz
+          echo "export PATH='$PATH:`pwd`/flutter/bin'" >> $BASH_ENV
+  install_flutter_dependencies:
+    steps:
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+      - run: |
+          flutter pub get
+          flutter packages pub run build_runner build
+      - save_cache:
+          paths:
+            - .dart_tool
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
+  install_android_gems:
+    steps:
       - restore_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
       - run: 
@@ -42,6 +48,19 @@ jobs:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
           paths:
             - android/vendor/bundle
+  install_ios_gems:
+    steps:
+      - restore_cache:
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
+      - run: 
+          command: bundle install
+          working_directory: ios
+      - save_cache:
+          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
+          paths:
+            - ios/vendor/bundle
+  install_android_gradle:
+    steps:
       - restore_cache:
           key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
       - run:
@@ -51,18 +70,33 @@ jobs:
           paths:
             - ~/.gradle
           key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
-      - persist_to_workspace:
-          root: .
+  install_ios_pod:
+    steps:
+      - restore_cache:
+          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
+      - run: 
+          command: pod install
+          working_directory: ios
+      - save_cache:
+          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
           paths:
-            - .
+            - ios/Pods
+
+jobs:
+  unit_test:
+    executor: flutter
+    steps:
+      - checkout
+      - run:
+          name: Run tests
+          command: flutter test
 
   integration_test_android:
     executor:
       name: android/android-machine
       resource-class: xlarge
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
       - run:
           name: Create AVD
           command: |
@@ -74,6 +108,9 @@ jobs:
           command: |
             emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           background: true
+      - install_flutter_linux
+      - install_flutter_dependencies
+      - install_android_gradle
       - run:
           name: Wait for emulator
           command: |
@@ -86,73 +123,29 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
       - run:
           name: Integration Test
-          command: ./flutter/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
   distribute_android:
     executor:
       name: android/android-machine
       resource-class: xlarge
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
+      - install_flutter_linux
+      - install_flutter_dependencies
+      - install_android_gradle
+      - install_android_gems
       - run:
           command: bundle exec fastlane beta
           working_directory: android
 
-  setup_ios:
-    executor: mac
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - run:
-          name: Install flutter & dependencies
-          command: |
-            if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
-            unzip flutter_sdk.zip
-            ./flutter/bin/flutter pub get .
-      - save_cache:
-          paths:
-            - .dart_tool
-          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
-      - restore_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
-      - run: 
-          command: bundle install
-          working_directory: ios
-      - save_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
-          paths:
-            - ios/vendor/bundle
-      - restore_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
-      - run: 
-          command: pod install
-          working_directory: ios
-      - save_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
-          paths:
-            - ios/Pods
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
-
-  distribute_ios:
-    executor: mac
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          command: bundle exec fastlane beta
-          working_directory: ios
-
   integration_test_ios:
     executor: mac
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
+      - install_flutter_macos
+      - install_flutter_dependencies
+      - install_ios_pod
       - run:
           name: pre-start simulator
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
@@ -160,21 +153,23 @@ jobs:
           name: Integration Test
           command: ./flutter/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
+  distribute_ios:
+    executor: mac
+    steps:
+      - checkout
+      - install_flutter_macos
+      - install_flutter_dependencies
+      - install_ios_pod
+      - install_ios_gems
+      - run:
+          command: bundle exec fastlane beta
+          working_directory: ios
+
 workflows:
   test_and_distribute:
     jobs:
       - unit_test
-      - setup_ios
-      - integration_test_ios:
-          requires:
-            - setup_ios
-      - distribute_ios:
-          requires:
-            - setup_ios
-      - setup_android
-      - integration_test_android:
-          requires:
-            - setup_android
-      - distribute_android:
-          requires:
-            - setup_android
+      - integration_test_ios
+      - distribute_ios
+      - integration_test_android
+      - distribute_android
