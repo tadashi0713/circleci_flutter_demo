@@ -6,7 +6,7 @@ orbs:
 executors:
   mac:
     macos:
-      xcode: 12.4.0
+      xcode: 12.5.0
   flutter:
     docker:
       - image: cirrusci/flutter:2.2.2
@@ -148,8 +148,7 @@ jobs:
       - install_ios_pod
       - install_ios_gems
       - run:
-          command: bundle exec fastlane distribute_debug
-          working_directory: ios
+          command: $FLUTTER_HOME/bin/flutter build ios --no-codesign
 
 workflows:
   test_and_distribute:
