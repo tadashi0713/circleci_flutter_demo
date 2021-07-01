@@ -18,13 +18,15 @@ commands:
       - run: |
           if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
           unzip flutter_sdk.zip
-          ./flutter/bin/flutter pub get
+          echo 'export FLUTTER_HOME=~/project/flutter' >> $BASH_ENV && source $BASH_ENV
+          $FLUTTER_HOME/bin/flutter pub get
   install_flutter_linux:
     steps:
       - run: |
           if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
           tar xf flutter_sdk.tar.xz
-          ./flutter/bin/flutter pub get
+          echo 'export FLUTTER_HOME=~/project/flutter' >> $BASH_ENV && source $BASH_ENV
+          $FLUTTER_HOME/bin/flutter pub get
   install_android_gems:
     steps:
       - restore_cache:
@@ -110,7 +112,7 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
       - run:
           name: Integration Test
-          command: ./flutter/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: $FLUTTER_HOME/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
   distribute_android:
     executor:
@@ -136,7 +138,7 @@ jobs:
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
-          command: ./flutter/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: $FLUTTER_HOME/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
   distribute_ios:
     executor: mac

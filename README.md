@@ -1,16 +1,9 @@
 # circleci_flutter_demo
 
-A new Flutter project.
+[![CircleCI](https://circleci.com/gh/tadashi0713/circleci_flutter_demo/tree/main.svg?style=svg&circle-token=4b7a45cbf68aec16634634e7504e653d7b77b235)](https://circleci.com/gh/tadashi0713/circleci_flutter_demo/tree/main)
 
-## Getting Started
+Demo for CI/CD pipeline for Flutter app using CircleCI.
 
-This project is a starting point for a Flutter application.
+* All config as code
+    * [CircleCI config file](.circleci/config.yml)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
