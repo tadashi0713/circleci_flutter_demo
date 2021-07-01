@@ -32,7 +32,7 @@ jobs:
           command: |
             if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
             tar xf flutter_sdk.tar.xz
-      - run: ./flutter/bin/flutter pub get
+      - run: ./flutter/bin/flutter doctor
       - restore_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
       - run: 
@@ -141,7 +141,7 @@ jobs:
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
-          command: flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: ./flutter/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
 
 workflows:
   test_and_distribute:
