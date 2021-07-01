@@ -27,11 +27,19 @@ jobs:
       resource-class: xlarge
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - run:
           name: Install flutter & dependencies
           command: |
             if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
             tar xf flutter_sdk.tar.xz
+            ./flutter/bin/flutter pub get .
+      - save_cache:
+          paths:
+            - .dart_tool
+          key: dart-dependencies-{{ checksum "pubspec.lock" }}-{{ arch }}
       - restore_cache:
           key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
       - run: 
@@ -101,6 +109,7 @@ jobs:
           command: |
             if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
             unzip flutter_sdk.zip
+            ./flutter/bin/flutter pub get .
       - save_cache:
           paths:
             - .dart_tool
@@ -114,6 +123,15 @@ jobs:
           key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
           paths:
             - ios/vendor/bundle
+      - restore_cache:
+          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
+      - run: 
+          command: pod install
+          working_directory: ios
+      - save_cache:
+          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
+          paths:
+            - ios/Pods
       - persist_to_workspace:
           root: .
           paths:
