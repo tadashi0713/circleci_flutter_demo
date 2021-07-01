@@ -75,7 +75,6 @@ jobs:
     executor: flutter
     steps:
       - checkout
-      - install_flutter_dependencies
       - run:
           name: Run tests
           command: flutter test
@@ -128,7 +127,6 @@ jobs:
     steps:
       - checkout
       - install_flutter_macos
-      - install_flutter_dependencies
       - install_ios_pod
       - run:
           name: pre-start simulator
@@ -142,7 +140,6 @@ jobs:
     steps:
       - checkout
       - install_flutter_macos
-      - install_flutter_dependencies
       - install_ios_pod
       - install_ios_gems
       - run:
