@@ -79,7 +79,11 @@ jobs:
       - checkout
       - run:
           name: Run tests
-          command: flutter test
+          command: |
+            mkdir -p test-results/junit/
+            flutter test --machine | tojunit > test-results/junit/result.xml
+      - store_test_results:
+          path: test-results
 
   integration_test_android:
     executor:
