@@ -12,5 +12,11 @@ Demo for CI/CD pipeline for Flutter app using CircleCI.
     * https://circleci.com/docs/2.0/testing-ios/
 * Android integration(UI) test using Android emulator on CircleCI Android machine
     * https://circleci.com/docs/2.0/android-machine-image/
+* Generate HTML report with screenshots of integration(UI) test
+    * https://pub.dev/packages/ozzie
+    * [Link of HTML report from CircleCI Artifacts](https://388-380987153-gh.circle-artifacts.com/0/ozzie/index.html)
+
+![](./ozzie.png)
+
 * Build & distribute app to Firebase App Distribution using Fastlane(Only android)
     * [Fastfile](android/fastlane/Fastfile)
