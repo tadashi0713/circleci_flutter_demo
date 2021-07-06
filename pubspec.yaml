@@ -35,7 +35,10 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
   test: any
-  ozzie: ^1.0.2
+  ozzie:
+    git:
+      url: https://github.com/tadashi0713/ozzie.flutter.git
+      ref: c34ab305c4b386b13cf80f171fcb643fb34199a2
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

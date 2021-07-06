@@ -213,10 +213,12 @@ packages:
   ozzie:
     dependency: "direct dev"
     description:
-      name: ozzie
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.2"
+      path: "."
+      ref: c34ab305c4b386b13cf80f171fcb643fb34199a2
+      resolved-ref: c34ab305c4b386b13cf80f171fcb643fb34199a2
+      url: "https://github.com/tadashi0713/ozzie.flutter.git"
+    source: git
+    version: "2.2.3"
   package_config:
     dependency: transitive
     description:
