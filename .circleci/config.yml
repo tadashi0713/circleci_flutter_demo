@@ -80,8 +80,9 @@ jobs:
       - run:
           name: Run tests
           command: |
-            mkdir -p test-results/junit/
             flutter pub global activate junitreport
+            export PATH="$PATH":"$HOME/.pub-cache/bin"
+            mkdir -p test-results/junit/
             flutter test --machine | tojunit > test-results/junit/result.xml
       - store_test_results:
           path: test-results
