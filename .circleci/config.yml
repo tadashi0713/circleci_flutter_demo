@@ -81,7 +81,7 @@ jobs:
           name: Run tests
           command: |
             mkdir -p test-results/junit/
-            dart pub global activate junitreport
+            flutter pub global activate junitreport
             flutter test --machine | tojunit > test-results/junit/result.xml
       - store_test_results:
           path: test-results
