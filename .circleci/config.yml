@@ -119,7 +119,9 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
       - run:
           name: Integration Test
-          command: $FLUTTER_HOME/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: $FLUTTER_HOME/bin/flutter drive --target=test_driver/app.dart
+      - store_artifacts:
+          path: ozzie
 
   distribute_android:
     executor:
@@ -145,7 +147,9 @@ jobs:
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
-          command: $FLUTTER_HOME/bin/flutter drive --driver=test_driver/integration_test_driver.dart --target=integrarion_test/counter_test.dart
+          command: $FLUTTER_HOME/bin/flutter drive --target=test_driver/app.dart
+      - store_artifacts:
+          path: ozzie
 
   distribute_ios:
     executor: mac
