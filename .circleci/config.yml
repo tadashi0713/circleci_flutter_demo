@@ -6,7 +6,7 @@ orbs:
 executors:
   mac:
     macos:
-      xcode: 12.5.0
+      xcode: 12.5.1
   flutter:
     docker:
       - image: cirrusci/flutter:2.2.2
@@ -81,6 +81,7 @@ jobs:
           name: Run tests
           command: |
             mkdir -p test-results/junit/
+            dart pub global activate junitreport
             flutter test --machine | tojunit > test-results/junit/result.xml
       - store_test_results:
           path: test-results
