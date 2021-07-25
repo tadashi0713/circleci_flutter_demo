@@ -18,11 +18,7 @@ default_platform(:android)
 platform :android do
   desc "Distribute new debug application to firebase app distribution"
   lane :distribute_debug do
-    if is_ci?
-      sh("cd ../../ && $FLUTTER_HOME/bin/flutter build apk --debug")
-    else
-      sh("cd ../../ && flutter build apk --debug")
-    end
+    sh("cd ../../ && flutter build apk --debug")
     firebase_app_distribution(
       app: "1:923170042883:android:ac46089ace0c303be70a36",
       testers: "tadashi.nemoto0713@gmail.com",
