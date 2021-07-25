@@ -95,6 +95,7 @@ jobs:
       - flutter-orb/install:
           os: linux
           version: 2.2.3
+      - run: flutter pub get
       - install_android_gradle
       - run:
           name: Wait for emulator
@@ -121,6 +122,7 @@ jobs:
       - flutter-orb/install:
           os: linux
           version: 2.2.3
+      - run: flutter pub get
       - install_android_gradle
       - install_android_gems
       - run:
@@ -134,6 +136,7 @@ jobs:
       - flutter-orb/install:
           os: macos
           version: 2.2.3
+      - run: flutter pub get
       - install_ios_pod
       - run:
           name: pre-start simulator
@@ -151,6 +154,7 @@ jobs:
       - flutter-orb/install:
           os: macos
           version: 2.2.3
+      - run: flutter pub get
       - install_ios_pod
       - install_ios_gems
       - run:
