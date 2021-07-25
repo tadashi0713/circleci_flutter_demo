@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   android: circleci/android@1.0.3
+  flutter-orb: tadashi0713/flutter-orb@0.0.1
 
 executors:
   mac:
@@ -13,20 +14,6 @@ executors:
     resource_class: xlarge
 
 commands:
-  install_flutter_macos:
-    steps:
-      - run: |
-          if ! test -f "flutter_sdk.zip"; then curl -o flutter_sdk.zip https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_2.2.2-stable.zip; fi
-          unzip flutter_sdk.zip
-          echo 'export FLUTTER_HOME=~/project/flutter' >> $BASH_ENV && source $BASH_ENV
-          $FLUTTER_HOME/bin/flutter pub get
-  install_flutter_linux:
-    steps:
-      - run: |
-          if ! test -f "flutter_sdk.tar.xz"; then curl -o flutter_sdk.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.2.2-stable.tar.xz; fi
-          tar xf flutter_sdk.tar.xz
-          echo 'export FLUTTER_HOME=~/project/flutter' >> $BASH_ENV && source $BASH_ENV
-          $FLUTTER_HOME/bin/flutter pub get
   install_android_gems:
     steps:
       - restore_cache:
@@ -105,7 +92,9 @@ jobs:
           command: |
             emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           background: true
-      - install_flutter_linux
+      - flutter-orb/install:
+          os: linux
+          version: 2.2.3
       - install_android_gradle
       - run:
           name: Wait for emulator
@@ -119,7 +108,7 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
       - run:
           name: Integration Test
-          command: $FLUTTER_HOME/bin/flutter drive --target=test_driver/app.dart
+          command: flutter drive --target=test_driver/app.dart
       - store_artifacts:
           path: ozzie
 
@@ -129,7 +118,9 @@ jobs:
       resource-class: xlarge
     steps:
       - checkout
-      - install_flutter_linux
+      - flutter-orb/install:
+          os: linux
+          version: 2.2.3
       - install_android_gradle
       - install_android_gems
       - run:
@@ -140,14 +131,16 @@ jobs:
     executor: mac
     steps:
       - checkout
-      - install_flutter_macos
+      - flutter-orb/install:
+          os: macos
+          version: 2.2.3
       - install_ios_pod
       - run:
           name: pre-start simulator
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
-          command: $FLUTTER_HOME/bin/flutter drive --target=test_driver/app.dart
+          command: flutter drive --target=test_driver/app.dart
       - store_artifacts:
           path: ozzie
 
@@ -155,7 +148,9 @@ jobs:
     executor: mac
     steps:
       - checkout
-      - install_flutter_macos
+      - flutter-orb/install:
+          os: macos
+          version: 2.2.3
       - install_ios_pod
       - install_ios_gems
       - run:
