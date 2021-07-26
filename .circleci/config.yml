@@ -2,78 +2,14 @@ version: 2.1
 
 orbs:
   android: circleci/android@1.0.3
-  flutter-orb: tadashi0713/flutter-orb@0.0.1
+  flutter-orb: tadashi0713/flutter-orb@0.0.9
 
 executors:
   mac:
     macos:
       xcode: 12.5.1
-  flutter:
-    docker:
-      - image: cirrusci/flutter:2.2.2
-    resource_class: xlarge
-
-commands:
-  install_android_gems:
-    steps:
-      - restore_cache:
-          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
-      - run: 
-          command: bundle install
-          working_directory: android
-      - save_cache:
-          key: bundle-v1-{{ checksum "android/Gemfile.lock" }}-{{ arch }}
-          paths:
-            - android/vendor/bundle
-  install_ios_gems:
-    steps:
-      - restore_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
-      - run: 
-          command: bundle install
-          working_directory: ios
-      - save_cache:
-          key: bundle-v1-{{ checksum "ios/Gemfile.lock" }}-{{ arch }}
-          paths:
-            - ios/vendor/bundle
-  install_android_gradle:
-    steps:
-      - restore_cache:
-          key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
-      - run:
-          command: gradle androidDependencies
-          working_directory: android
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: jars-{{ checksum  "android/app/build.gradle" }}-{{ arch }}
-  install_ios_pod:
-    steps:
-      - restore_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
-      - run: 
-          command: pod install
-          working_directory: ios
-      - save_cache:
-          key: pods-v1-{{ checksum "ios/Podfile.lock" }}-{{ arch }}
-          paths:
-            - ios/Pods
 
 jobs:
-  unit_test:
-    executor: flutter
-    steps:
-      - checkout
-      - run:
-          name: Run tests
-          command: |
-            flutter pub global activate junitreport
-            export PATH="$PATH":"$HOME/.pub-cache/bin"
-            mkdir -p test-results/junit/
-            flutter test --machine | tojunit > test-results/junit/result.xml
-      - store_test_results:
-          path: test-results
-
   integration_test_android:
     executor:
       name: android/android-machine
@@ -92,11 +28,9 @@ jobs:
           command: |
             emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           background: true
-      - flutter-orb/install:
-          os: linux
-          version: 2.2.3
-      - run: flutter pub get
-      - install_android_gradle
+      - flutter-orb/install_sdk
+      - flutter-orb/install_pub
+      - flutter-orb/install_android_gradle
       - run:
           name: Wait for emulator
           command: |
@@ -119,12 +53,10 @@ jobs:
       resource-class: xlarge
     steps:
       - checkout
-      - flutter-orb/install:
-          os: linux
-          version: 2.2.3
-      - run: flutter pub get
-      - install_android_gradle
-      - install_android_gems
+      - flutter-orb/install_sdk
+      - flutter-orb/install_pub
+      - flutter-orb/install_android_gradle
+      - flutter-orb/install_android_gem
       - run:
           command: bundle exec fastlane distribute_debug
           working_directory: android
@@ -133,11 +65,10 @@ jobs:
     executor: mac
     steps:
       - checkout
-      - flutter-orb/install:
-          os: macos
-          version: 2.2.3
-      - run: flutter pub get
-      - install_ios_pod
+      - flutter-orb/install_sdk
+      - flutter-orb/install_pub
+      - flutter-orb/install_ios_pod
+      - flutter-orb/install_ios_gem
       - run:
           name: pre-start simulator
           command: xcrun instruments -w "iPhone 12 (14.5) [" || true
@@ -151,12 +82,10 @@ jobs:
     executor: mac
     steps:
       - checkout
-      - flutter-orb/install:
-          os: macos
-          version: 2.2.3
-      - run: flutter pub get
-      - install_ios_pod
-      - install_ios_gems
+      - flutter-orb/install_sdk
+      - flutter-orb/install_pub
+      - flutter-orb/install_ios_pod
+      - flutter-orb/install_ios_gem
       - run:
           command: bundle exec fastlane distribute_debug
           working_directory: ios
@@ -164,7 +93,8 @@ jobs:
 workflows:
   test_and_distribute:
     jobs:
-      - unit_test
+      - flutter-orb/unit_test
+      - flutter-orb/lint
       - integration_test_ios
       - distribute_ios
       - integration_test_android
