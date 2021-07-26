@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   android: circleci/android@1.0.3
-  flutter-orb: tadashi0713/flutter-orb@1.0.0
+  flutter-orb: tadashi0713/flutter-orb@1.1.0
 
 executors:
   mac:
