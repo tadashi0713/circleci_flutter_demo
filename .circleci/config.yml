@@ -30,7 +30,7 @@ jobs:
           background: true
       - flutter-orb/install_sdk
       - flutter-orb/install_pub:
-          version: v2
+          cache-version: v2
       - flutter-orb/install_android_gradle
       - run:
           name: Wait for emulator
@@ -56,7 +56,7 @@ jobs:
       - checkout
       - flutter-orb/install_sdk
       - flutter-orb/install_pub:
-          version: v2
+          cache-version: v2
       - flutter-orb/install_android_gradle
       - flutter-orb/install_android_gem
       - run:
