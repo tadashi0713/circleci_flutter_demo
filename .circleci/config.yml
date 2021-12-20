@@ -21,7 +21,7 @@ jobs:
       - android/start-emulator:
           avd-name: flutter
           post-emulator-launch-assemble-command: ''
-          restore-gradle-cache-find-arg: ./android -name 'build.gradle'
+          restore-gradle-cache-find-args: ./android -name 'build.gradle'
       - flutter-orb/install_sdk_and_pub:
           cache-version: machine
       - run:
