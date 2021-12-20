@@ -1,47 +1,29 @@
 version: 2.1
 
 orbs:
-  android: circleci/android@1.0.3
+  android: circleci/android@2.0.0
   flutter-orb: circleci/flutter@1.0.1
   ruby: circleci/ruby@1.2.0
-
-executors:
-  mac:
-    macos:
-      xcode: 12.5.1
+  macos: circleci/macos@2.0.1
 
 jobs:
   integration_test_android:
     executor:
       name: android/android-machine
       resource-class: xlarge
+      tag: 2021.10.1
     steps:
       - checkout
-      - run:
-          name: Create AVD
-          command: |
-            SYSTEM_IMAGES="system-images;android-29;default;x86"
-            DEVICE="pixel_4"
-            sdkmanager "$SYSTEM_IMAGES"
-            echo "no" | avdmanager --verbose create avd -n test -k "$SYSTEM_IMAGES" -d "$DEVICE"
-      - run:
-          name: Boot emulator
-          command: |
-            emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          background: true
+      - android/create-avd:
+          avd-name: flutter
+          install: true
+          system-image: system-images;android-29;default;x86
+      - android/start-emulator:
+          avd-name: flutter
+          post-emulator-launch-assemble-command: ''
+          restore-gradle-cache-find-arg: ./android -name 'build.gradle'
       - flutter-orb/install_sdk_and_pub:
-          cache-version: v2
-      - flutter-orb/install_android_gradle
-      - run:
-          name: Wait for emulator
-          command: |
-            circle-android wait-for-boot
-      - run:
-          name: Disable emulator animation
-          command: |
-            adb shell settings put global window_animation_scale 0.0
-            adb shell settings put global transition_animation_scale 0.0
-            adb shell settings put global animator_duration_scale 0.0
+          cache-version: machine
       - run:
           name: Integration Test
           command: flutter drive --target=test_driver/app.dart
@@ -50,12 +32,13 @@ jobs:
 
   distribute_android:
     executor:
-      name: android/android-machine
+      name: android/android-docker
       resource-class: xlarge
+      tag: 2021.12.1
     steps:
       - checkout
       - flutter-orb/install_sdk_and_pub:
-          cache-version: v2
+          cache-version: docker
       - flutter-orb/install_android_gradle
       - ruby/install-deps:
           app-dir: android
@@ -64,14 +47,16 @@ jobs:
           working_directory: android
 
   integration_test_ios:
-    executor: mac
+    macos:
+      xcode: 13.1.0
+    resource_class: large
     steps:
       - checkout
+      - macos/preboot-simulator:
+          device: iPhone 13
+          version: "15.0"
       - flutter-orb/install_sdk_and_pub
       - flutter-orb/install_ios_pod
-      - run:
-          name: pre-start simulator
-          command: xcrun instruments -w "iPhone 12 (14.5) [" || true
       - run:
           name: Integration Test
           command: flutter drive --target=test_driver/app.dart
@@ -79,7 +64,9 @@ jobs:
           path: ozzie
 
   distribute_ios:
-    executor: mac
+    macos:
+      xcode: 13.1.0
+    resource_class: large
     steps:
       - checkout
       - flutter-orb/install_sdk_and_pub
