@@ -20,7 +20,7 @@ jobs:
           system-image: system-images;android-29;default;x86
       - android/start-emulator:
           avd-name: flutter
-          post-emulator-launch-assemble-command: ''
+          post-emulator-launch-assemble-command: './gradlew assembleDebug'
           restore-gradle-cache-find-args: ./android -name 'build.gradle'
       - flutter-orb/install_sdk_and_pub:
           cache-version: machine
