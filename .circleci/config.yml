@@ -42,6 +42,7 @@ jobs:
       - flutter-orb/install_android_gradle
       - ruby/install-deps:
           app-dir: android
+          key: android
       - run:
           command: bundle exec fastlane distribute_debug
           working_directory: android
@@ -73,6 +74,7 @@ jobs:
       - flutter-orb/install_ios_pod
       - ruby/install-deps:
           app-dir: ios
+          key: ios
       - run:
           command: bundle exec fastlane distribute_debug
           working_directory: ios
