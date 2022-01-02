@@ -24,9 +24,8 @@ jobs:
           avd-name: flutter
           post-emulator-launch-assemble-command: 'flutter build apk --debug'
           restore-gradle-cache-find-args: ./android -name 'build.gradle'
-      - run:
-          name: Integration Test
-          command: flutter drive --target=test_driver/app.dart
+      - android/run-tests:
+          test-command: flutter drive --target=test_driver/app.dart
       - store_artifacts:
           path: ozzie
 
