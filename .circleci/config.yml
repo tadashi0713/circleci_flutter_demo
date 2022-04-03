@@ -90,6 +90,10 @@ workflows:
       - flutter-orb/lint:
           version: 2.10.3
       - integration_test_ios
-      - distribute_ios
+      - distribute_ios:
+          context:
+            - mobile
       - integration_test_android
-      - distribute_android
+      - distribute_android:
+          context: # Context
+            - mobile
