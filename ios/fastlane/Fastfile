@@ -16,6 +16,10 @@
 default_platform(:ios)
 
 platform :ios do
+  before_all do
+    setup_circle_ci
+  end
+
   desc "Distribute new debug application to firebase app distribution"
   lane :distribute_debug do
     match(type: "adhoc")
