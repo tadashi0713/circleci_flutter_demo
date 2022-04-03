@@ -23,10 +23,6 @@ platform :ios do
   desc "Distribute new debug application to firebase app distribution"
   lane :distribute_debug do
     match(type: "adhoc")
-    build_app(
-      scheme: "CircleCIDemo",
-      configuration: "Debug",
-      export_method: "ad-hoc"
-    )
+    sh("cd ../../ && flutter clean && flutter build ipa --debug")
   end
 end
