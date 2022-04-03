@@ -28,5 +28,8 @@ platform :ios do
       configuration: "Debug",
       export_method: "ad-hoc"
     )
+    firebase_app_distribution(
+      app: "1:923170042883:ios:4afe1e60a489cbeae70a36"
+    )
   end
 end
