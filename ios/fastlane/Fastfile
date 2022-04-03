@@ -23,6 +23,10 @@ platform :ios do
   desc "Distribute new debug application to firebase app distribution"
   lane :distribute_debug do
     match(type: "adhoc")
-    sh("cd ../../ && flutter clean && flutter build ipa --debug")
+    build_app(
+      scheme: "Runner",
+      configuration: "Debug",
+      export_method: "ad-hoc"
+    )
   end
 end
