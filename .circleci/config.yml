@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  android: circleci/android@2.1.0
+  android: circleci/android@2.1.2
   flutter-orb: circleci/flutter@1.1.0
   ruby: circleci/ruby@1.8.0
   macos: circleci/macos@2.2.0
